@@ -1,0 +1,65 @@
+# Builds Vexa for Android, iOS and macOS on GitHub's machines.
+# Run it from the Actions tab; the finished files appear as run artifacts.
+name: Build Vexa
+on:
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm ci
+      - run: npm run build
+      - name: Create Android project
+        run: |
+          npx cap add android
+          mkdir -p assets && cp build/icon.png assets/icon.png
+          npx --yes @capacitor/assets@3.0.5 generate --android --iconBackgroundColor '#0a0b10' --splashBackgroundColor '#0a0b10' || echo "icon generation skipped"
+          npx cap sync android
+      - name: Build debug APK
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with: { name: Vexa-Android, path: android/app/build/outputs/apk/debug/*.apk }
+
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - name: Create iOS project
+        run: |
+          npx cap add ios
+          mkdir -p assets && cp build/icon.png assets/icon.png
+          npx --yes @capacitor/assets@3.0.5 generate --ios --iconBackgroundColor '#0a0b10' --splashBackgroundColor '#0a0b10' || echo "icon generation skipped"
+          npx cap sync ios
+      - name: Build unsigned IPA
+        working-directory: ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release -sdk iphoneos -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          mkdir -p Payload && cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qr ../../Vexa-iOS-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with: { name: Vexa-iOS-unsigned, path: Vexa-iOS-unsigned.ipa }
+
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Build unsigned DMG
+        env: { CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
+        run: npm run dist:mac
+      - uses: actions/upload-artifact@v4
+        with: { name: Vexa-macOS, path: release/*.dmg }

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20222f"/><stop offset=".55" stop-color="#0c0d14"/><stop offset="1" stop-color="#040408"/></linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffc233"/><stop offset=".45" stop-color="#ff4d2e"/><stop offset="1" stop-color="#c9003a"/></linearGradient>
+    <linearGradient id="v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d7dbe6"/></linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".56" r=".5"><stop offset="0" stop-color="#ff4d2e" stop-opacity=".5"/><stop offset="1" stop-color="#ff4d2e" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="228" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="228" fill="url(#glow)"/>
+  <path d="M176 760 H300 V826 Q300 850 276 850 H200 Q176 850 176 826 Z M724 760 H848 V826 Q848 850 824 850 H748 Q724 850 724 826 Z" fill="#05060a" stroke="#ff4d2e" stroke-opacity=".55" stroke-width="6"/>
+  <path d="M352 196 H672 Q716 196 738 234 L812 378 L896 420 Q934 440 934 486 V700 Q934 776 858 784 L640 806 H384 L166 784 Q90 776 90 700 V486 Q90 440 128 420 L212 378 L286 234 Q308 196 352 196 Z" fill="url(#body)"/>
+  <path d="M368 246 H656 Q678 246 690 266 L746 376 Q702 392 512 392 Q322 392 278 376 L334 266 Q346 246 368 246 Z" fill="#090b12"/>
+  <path d="M388 268 H520 L450 366 Q388 364 336 356 Z" fill="#ffffff" opacity=".13"/>
+  <path d="M132 486 L352 556 Q368 562 362 578 Q356 592 338 590 L168 568 Q132 562 132 526 Z" fill="#090b12"/>
+  <path d="M892 486 L672 556 Q656 562 662 578 Q668 592 686 590 L856 568 Q892 562 892 526 Z" fill="#090b12"/>
+  <path d="M156 512 L330 568 L176 548 Q156 544 156 524 Z" fill="#ffffff"/>
+  <path d="M868 512 L694 568 L848 548 Q868 544 868 524 Z" fill="#ffffff"/>
+  <path d="M356 452 H464 L512 556 L560 452 H668 L560 742 H464 Z" fill="#090b12"/>
+  <path d="M384 470 H452 L512 600 L572 470 H640 L546 722 H478 Z" fill="url(#v)"/>
+  <path d="M150 668 L330 700 L362 760 L190 744 Q150 738 150 700 Z M874 668 L694 700 L662 760 L834 744 Q874 738 874 700 Z" fill="#090b12"/>
+</svg>
