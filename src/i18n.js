@@ -1,3 +1,6 @@
+import { CARE_UI } from './data/care.js';
+import { EXTRA_UI } from './data/extra.js';
+
 const KEYS = `home brands cars compare favorites settings tagline heroText explore statBrands statModels statCountries featured search all allCountries noResults noModelsBrand founded active defunct models back
 cat_sport cat_classic cat_economy cat_luxury cat_suv body_sedan body_hatch body_coupe body_wagon body_suv body_convertible body_pickup body_supercar fuel_p fuel_d
 tab_overview tab_engine tab_perf tab_dims tab_interior tab_exterior engine displacement aspiration asp_NA asp_T asp_TT asp_S cylinders power torque drive drive_FWD drive_RWD drive_AWD gearbox gb_M gb_A gb_D gb_CVT speeds
@@ -70,7 +73,7 @@ export const LANGUAGES = [
 export const DICTS = Object.fromEntries(Object.entries(PACKS).map(([lang, text]) => {
   const values = text.split(/[|\n]/);
   if (values.length !== KEYS.length) throw new Error(`i18n ${lang}: ${values.length}/${KEYS.length}`);
-  return [lang, Object.fromEntries(KEYS.map((key, i) => [key, values[i]]))];
+  return [lang, { ...Object.fromEntries(KEYS.map((key, i) => [key, values[i]])), ...CARE_UI[lang], ...EXTRA_UI[lang] }];
 }));
 
 export function detectLanguage() {

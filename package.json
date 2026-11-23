@@ -1,8 +1,10 @@
 {
   "name": "vexa",
   "productName": "Vexa",
-  "version": "1.0.0",
-  "description": "Vexa - petrol and diesel car encyclopedia with interactive 3D interior and exterior views",
+  "version": "1.1.0",
+  "description": "Vexa - petrol and diesel car and motorcycle encyclopedia",
+  "author": "Tv Man",
+  "homepage": "https://github.com/tvman78/Vexa",
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
@@ -19,24 +21,55 @@
     "@capacitor/android": "^8.6.2",
     "@capacitor/core": "^8.6.2",
     "@capacitor/ios": "^8.6.2",
+    "electron-updater": "^6.8.11",
     "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "three": "0.170.0"
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.2",
     "@vitejs/plugin-react": "4.3.4",
     "electron": "33.2.1",
     "electron-builder": "25.1.8",
+    "sharp": "^0.33.5",
     "vite": "5.4.11"
   },
   "build": {
     "appId": "com.vexa.app",
     "productName": "Vexa",
-    "directories": { "output": "release", "buildResources": "build" },
-    "files": ["dist/**/*", "electron/**/*", "build/icon.png", "package.json"],
-    "win": { "target": "nsis", "icon": "build/icon.png" },
-    "mac": { "target": "dmg", "icon": "build/icon.png", "category": "public.app-category.reference" },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "shortcutName": "Vexa" }
+    "copyright": "Tv Man",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "tvman78",
+        "repo": "Vexa",
+        "releaseType": "release"
+      }
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "build/icon.png",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png",
+      "artifactName": "Vexa-Setup-${version}.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.png",
+      "category": "public.app-category.reference",
+      "artifactName": "Vexa-macOS-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Vexa"
+    }
   }
 }

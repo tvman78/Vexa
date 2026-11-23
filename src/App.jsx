@@ -1,16 +1,21 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { I18n, useI18n } from './context.js';
+import { Brands, CatalogBrand, CatalogDetail, ModelList, Monogram, Motorcycles, useCatalog } from './Catalog.jsx';
+import { Help, UpdatePanel } from './Help.jsx';
+import { NavIcon } from './icons.jsx';
+import { APP_VERSION } from './update.js';
 import { BRANDS, brandById } from './data/brands.js';
 import { MODELS, modelById, modelsOfBrand } from './data/models.js';
 import { DICTS, LANGUAGES, countryName, detectLanguage } from './i18n.js';
-import { Car3D, PAINTS } from './three/Car3D.js';
+import { partsFor, problemsFor } from './data/care.js';
+import PHOTOS from './data/photos.json';
 import logoUrl from '../build/icon.svg';
 
-const I18n = createContext(null);
-const useI18n = () => useContext(I18n);
 const CATS = ['sport', 'classic', 'economy', 'luxury', 'suv'];
 const BODIES = ['sedan', 'hatch', 'coupe', 'wagon', 'suv', 'convertible', 'pickup', 'supercar'];
-const VIEWS = ['orbit', 'front', 'side', 'rear', 'driver', 'rearseat', 'engine'];
-const NAV = [['home', '⌂'], ['brands', '◈'], ['cars', '◉'], ['compare', '⇄'], ['favorites', '♥'], ['settings', '⚙']];
+const photosOf = (car) => PHOTOS[`${car.brand}|${car.name}`] || [];
+const photoSrc = (photo) => `./cars/${photo.file}`;
+const NAV = ['home', 'brands', 'cars', 'motorcycles', 'compare', 'favorites', 'help', 'settings'];
 const FEATURED = ['M3 Competition (G80)', '911 Carrera S (992)', 'Huracán EVO', 'GT-R (R35)', 'Golf GTI (Mk8)', 'F40'];
 
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -30,60 +35,52 @@ function specs(car, t, n) {
 
 const years = (car, t) => (car.years.endsWith('-') ? `${car.years.slice(0, -1)} – ${t.present}` : car.years.replace('-', ' – '));
 
-function Monogram({ brand, large }) {
-  const hue = [...brand.id].reduce((sum, c) => sum + c.charCodeAt(0) * 7, 0) % 360;
-  const letters = brand.name.replace(/[^\p{L}\p{N} ]/gu, '').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
-  return <span className={`mono ${large ? 'large' : ''}`} style={{ '--h': hue }}>{letters}</span>;
-}
-
 function CarCard({ car, open, fav, toggleFav }) {
   const { t, n } = useI18n();
   const brand = brandById[car.brand];
+  const cover = photosOf(car)[0];
   return (
     <article className="car-card" onClick={() => open(car.id)}>
-      <div className="card-top">
+      <div className="card-photo">
+        {cover ? <img src={photoSrc(cover)} alt={`${brand.name} ${car.name}`} loading="lazy" /> : <span className="no-photo">{t.noPhoto}</span>}
         <span className={`chip ${car.fuel}`}>{t[`fuel_${car.fuel}`]}</span>
         <button className={`heart ${fav ? 'on' : ''}`} aria-label={fav ? t.removeFav : t.addFav} title={fav ? t.removeFav : t.addFav} onClick={(e) => { e.stopPropagation(); toggleFav(car.id); }}>♥</button>
       </div>
-      <small>{brand.name}</small>
-      <h3><bdi>{car.name}</bdi></h3>
-      <p className="muted">{t[`body_${car.body}`]} · <bdi>{years(car, t)}</bdi></p>
-      <div className="mini-stats">
-        <span><b>{n(car.hp)}</b> hp</span><span><b>{n(car.acc)}</b> s</span><span><b>{n(car.top)}</b> km/h</span>
+      <div className="card-body">
+        <small>{brand.name}</small>
+        <h3><bdi>{car.name}</bdi></h3>
+        <p className="muted">{t[`body_${car.body}`]} · <bdi>{years(car, t)}</bdi></p>
+        <div className="mini-stats">
+          <span><b>{n(car.hp)}</b> hp</span><span><b>{n(car.acc)}</b> s</span><span><b>{n(car.top)}</b> km/h</span>
+        </div>
       </div>
     </article>
   );
 }
 
-function Viewer({ car }) {
+function Gallery({ car }) {
   const { t } = useI18n();
-  const host = useRef(null);
-  const engine = useRef(null);
-  const [view, setView] = useState('orbit');
-  const [paint, setPaint] = useState(PAINTS[0]);
-  const [spin, setSpin] = useState(true);
-
-  useEffect(() => {
-    const instance = new Car3D(host.current, car, PAINTS[0]);
-    engine.current = instance;
-    if (import.meta.env.DEV || window.__vexaTest) window.__vexaCar = instance;
-    setView('orbit'); setPaint(PAINTS[0]); setSpin(true);
-    return () => { instance.dispose(); engine.current = null; };
-  }, [car]);
-
+  const brand = brandById[car.brand];
+  const photos = photosOf(car);
+  const [index, setIndex] = useState(0);
+  useEffect(() => setIndex(0), [car]);
+  if (!photos.length) return <section className="gallery"><div className="gallery-main"><span className="no-photo">{t.noPhoto}</span></div></section>;
+  const photo = photos[Math.min(index, photos.length - 1)];
+  const step = (delta) => setIndex((i) => (i + delta + photos.length) % photos.length);
   return (
-    <section className="viewer">
-      <div className="stage" ref={host} />
-      <div className="view-tabs">
-        {VIEWS.map((v) => <button key={v} className={view === v ? 'on' : ''} onClick={() => { setView(v); engine.current?.setView(v); }}>{t[`view_${v}`]}</button>)}
+    <section className="gallery">
+      <div className="gallery-main">
+        <img src={photoSrc(photo)} alt={`${brand.name} ${car.name}`} />
+        <span className="photo-kind">{t[`photo_${photo.kind}`]}</span>
+        {photos.length > 1 && <>
+          <button className="nav prev" aria-label={t.back} onClick={() => step(-1)}><span className="flip">‹</span></button>
+          <button className="nav next" aria-label={t.photoBy} onClick={() => step(1)}><span className="flip">›</span></button>
+        </>}
       </div>
-      <div className="viewer-tools">
-        <div className="paints" aria-label={t.paint}>
-          {PAINTS.map((c) => <button key={c} aria-label={`${t.paint} ${c}`} className={paint === c ? 'on' : ''} style={{ background: c }} onClick={() => { setPaint(c); engine.current?.setPaint(c); }} />)}
-        </div>
-        <label className="switch"><input type="checkbox" checked={spin} onChange={(e) => { setSpin(e.target.checked); engine.current?.setAutoRotate(e.target.checked); }} /> {t.autoRotate}</label>
-      </div>
-      <span className="hint">{t.dragHint}</span>
+      {photos.length > 1 && <div className="thumbs">{photos.map((p, i) => (
+        <button key={p.file} className={i === index ? 'on' : ''} aria-label={`${t.photoBy} ${i + 1}`} onClick={() => setIndex(i)}><img src={photoSrc(p)} alt="" loading="lazy" /></button>
+      ))}</div>}
+      <a className="credit" href={photo.url} target="_blank" rel="noreferrer">{t.photoBy}: <bdi>{photo.author}</bdi> · <bdi>{photo.license}</bdi> · Wikimedia Commons</a>
     </section>
   );
 }
@@ -92,32 +89,66 @@ function SpecGrid({ rows }) {
   return <dl className="spec-grid">{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd><bdi>{v}</bdi></dd></div>)}</dl>;
 }
 
+function Problems({ car }) {
+  const { t, lang } = useI18n();
+  return (
+    <div className="problem-list">
+      <p className="note">{t.problemsNote}</p>
+      {problemsFor(car, lang).map((p) => (
+        <article className="problem" key={p.id}>
+          <header><h3>{p.title}</h3><span className={`sev ${p.severity}`}>{t[`sev_${p.severity}`]}</span></header>
+          <p><b>{t.symptoms}:</b> {p.symptoms}</p>
+          <p><b>{t.solution}:</b> {p.solution}</p>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function Parts({ car }) {
+  const { t, lang } = useI18n();
+  return (
+    <div>
+      <p className="note">{t.partsNote}</p>
+      <div className="part-groups">
+        {partsFor(car, lang).map(({ group, parts }) => (
+          <section className="part-group" key={group}>
+            <h3>{t[`group_${group}`]}</h3>
+            <ul>{parts.map((part) => <li key={part.id}>{part.name}</li>)}</ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CarDetail({ car, back, fav, toggleFav }) {
   const { t, n, lang } = useI18n();
   const [tab, setTab] = useState('overview');
   const brand = brandById[car.brand];
   const s = useMemo(() => specs(car, t, n), [car, t, n]);
   const overview = [[t.production, years(car, t)], [t.country, countryName(brand.country, lang)], [t.category, t[`cat_${car.cat}`]], [t.bodyType, t[`body_${car.body}`]], s.engine[0], s.engine[5], s.engine[6], s.perf[0], s.perf[1], s.perf[4], s.perf[5], s.engine[4]];
-  const tabs = { overview, engine: s.engine, perf: s.perf, dims: s.dims, interior: s.interior, exterior: s.exterior };
+  const tabs = { overview, engine: s.engine, perf: s.perf, dims: s.dims, interior: s.interior, exterior: s.exterior, problems: null, parts: null };
   return (
     <div className="page detail">
       <header className="detail-head">
         <button className="ghost" onClick={back}><span className="flip">←</span> {t.back}</button>
-        <div className="detail-title"><Monogram brand={brand} /><div><small>{brand.name}</small><h1><bdi>{car.name}</bdi></h1></div></div>
+        <div className="detail-title"><Monogram name={brand.name} /><div><small>{brand.name}</small><h1><bdi>{car.name}</bdi></h1></div></div>
         <button className={`ghost fav ${fav ? 'on' : ''}`} onClick={() => toggleFav(car.id)}>♥ {fav ? t.removeFav : t.addFav}</button>
       </header>
-      <Viewer car={car} />
-      <p className="note">{t.modelNote}</p>
+      <Gallery car={car} />
       <div className="tabs">{Object.keys(tabs).map((k) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{t[`tab_${k}`]}</button>)}</div>
-      <SpecGrid rows={tabs[tab]} />
-      <p className="note">{t.dataNote}</p>
+      {tab === 'problems' ? <Problems car={car} /> : tab === 'parts' ? <Parts car={car} /> : <><SpecGrid rows={tabs[tab]} /><p className="note">{t.dataNote}</p></>}
     </div>
   );
 }
 
 function Home({ go, open, favs, toggleFav }) {
   const { t, n } = useI18n();
-  const countries = new Set(BRANDS.map((b) => b.country)).size;
+  const catalog = useCatalog();
+  const countries = new Set([...BRANDS.map((b) => b.country), ...(catalog ? [...catalog.car.brands, ...catalog.moto.brands].map((b) => b[1]).filter(Boolean) : [])]).size;
+  const brandTotal = new Set([...BRANDS.map((b) => b.name.toLowerCase()), ...(catalog ? [...catalog.car.brands, ...catalog.moto.brands].map((b) => b[0].toLowerCase()) : [])]).size;
+  const modelTotal = MODELS.length + (catalog ? catalog.car.rows.length + catalog.moto.rows.length : 0);
   const featured = FEATURED.map((name) => MODELS.find((m) => m.name === name)).filter(Boolean);
   return (
     <div className="page">
@@ -129,8 +160,8 @@ function Home({ go, open, favs, toggleFav }) {
           <button className="primary" onClick={() => go('cars')}>{t.explore} <span className="flip">→</span></button>
         </div>
         <div className="hero-stats">
-          <div><b>{n(BRANDS.length)}</b><span>{t.statBrands}</span></div>
-          <div><b>{n(MODELS.length)}</b><span>{t.statModels}</span></div>
+          <div><b>{n(brandTotal)}</b><span>{t.statBrands}</span></div>
+          <div><b>{n(modelTotal)}</b><span>{t.statModels}</span></div>
           <div><b>{n(countries)}</b><span>{t.statCountries}</span></div>
         </div>
       </section>
@@ -140,43 +171,18 @@ function Home({ go, open, favs, toggleFav }) {
   );
 }
 
-function Brands({ openBrand }) {
-  const { t, lang, n } = useI18n();
-  const [q, setQ] = useState('');
-  const [country, setCountry] = useState('');
-  const codes = useMemo(() => [...new Set(BRANDS.map((b) => b.country))].sort((a, b) => countryName(a, lang).localeCompare(countryName(b, lang), lang)), [lang]);
-  const list = BRANDS.filter((b) => b.name.toLocaleLowerCase(lang).includes(q.toLocaleLowerCase(lang)) && (!country || b.country === country));
-  return (
-    <div className="page">
-      <h1>{t.brands}</h1>
-      <div className="filters">
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.search} />
-        <select value={country} onChange={(e) => setCountry(e.target.value)} aria-label={t.country}>
-          <option value="">{t.allCountries}</option>
-          {codes.map((c) => <option key={c} value={c}>{countryName(c, lang)}</option>)}
-        </select>
-      </div>
-      {list.length ? <div className="brand-grid">{list.map((b) => (
-        <button className="brand-card" key={b.id} onClick={() => openBrand(b.id)}>
-          <Monogram brand={b} />
-          <span><b>{b.name}</b><small>{countryName(b.country, lang)} · {b.founded}</small><small>{n(modelsOfBrand(b.id).length)} {t.models}</small></span>
-        </button>
-      ))}</div> : <p className="empty">{t.noResults}</p>}
-    </div>
-  );
-}
-
-function BrandPage({ brand, back, open, favs, toggleFav }) {
+function BrandPage({ brand, back, open, favs, toggleFav, openModel }) {
   const { t, lang } = useI18n();
   const cars = modelsOfBrand(brand.id);
   return (
     <div className="page">
       <button className="ghost" onClick={back}><span className="flip">←</span> {t.back}</button>
       <section className="brand-head">
-        <Monogram brand={brand} large />
+        <Monogram name={brand.name} large />
         <div><h1>{brand.name}</h1><p className="muted">{countryName(brand.country, lang)} · {t.founded} {brand.founded} · {brand.active ? t.active : t.defunct}</p></div>
       </section>
-      {cars.length ? <div className="car-grid">{cars.map((c) => <CarCard key={c.id} car={c} open={open} fav={favs.includes(c.id)} toggleFav={toggleFav} />)}</div> : <p className="empty">{t.noModelsBrand}</p>}
+      {cars.length > 0 && <div className="car-grid">{cars.map((c) => <CarCard key={c.id} car={c} open={open} fav={favs.includes(c.id)} toggleFav={toggleFav} />)}</div>}
+      <ModelList kind="car" brandName={brand.name} openModel={openModel} />
     </div>
   );
 }
@@ -254,6 +260,8 @@ function Settings({ setLang }) {
       <h2>{t.language}</h2>
       <p className="muted">{t.languageHint}</p>
       <div className="lang-grid">{LANGUAGES.map(([code, name]) => <button key={code} lang={code} className={lang === code ? 'on' : ''} onClick={() => setLang(code)}>{name}</button>)}</div>
+      <h2>{t.updates}</h2>
+      <UpdatePanel />
     </div>
   );
 }
@@ -283,20 +291,27 @@ export default function App() {
   const open = (id) => push({ view: 'car', id });
   const openBrand = (id) => push({ view: 'brand', id });
   const toggleFav = (id) => setFavs((list) => { const next = list.includes(id) ? list.filter((x) => x !== id) : [...list, id]; write('vexa.favs', next); return next; });
+  const openCatalogBrand = (kind, name) => push({ view: 'catbrand', kind, name });
+  const openModel = (kind, id) => push({ view: 'model', kind, id });
   const shared = { open, favs, toggleFav };
-  const active = route.view === 'car' ? stack.find((r) => NAV.some(([k]) => k === r.view))?.view : route.view === 'brand' ? 'brands' : route.view;
+  const active = stack.find((r) => NAV.includes(r.view))?.view || 'brands';
 
   return (
     <I18n.Provider value={i18n}>
       <div className="shell">
         <nav className="side">
           <button className="brand" onClick={() => go('home')}><img src={logoUrl} alt="" /><span>Vexa</span></button>
-          {NAV.map(([key, icon]) => <button key={key} className={active === key ? 'on' : ''} onClick={() => go(key)}><i>{icon}</i><span>{i18n.t[key]}</span></button>)}
+          {NAV.map((key) => <button key={key} className={`nav-item ${active === key ? 'on' : ''}`} aria-current={active === key ? 'page' : undefined} onClick={() => go(key)}><i><NavIcon name={key} /></i><span>{i18n.t[key]}</span></button>)}
+          <div className="side-foot"><small>{i18n.t.madeBy}</small><b>Tv Man</b><small>v{APP_VERSION}</small></div>
         </nav>
         <main ref={main}>
           {route.view === 'home' && <Home go={go} {...shared} />}
-          {route.view === 'brands' && <Brands openBrand={openBrand} />}
-          {route.view === 'brand' && <BrandPage brand={brandById[route.id]} back={back} {...shared} />}
+          {route.view === 'brands' && <Brands openBrand={openBrand} openCatalogBrand={openCatalogBrand} />}
+          {route.view === 'brand' && <BrandPage brand={brandById[route.id]} back={back} openModel={openModel} {...shared} />}
+          {route.view === 'catbrand' && <CatalogBrand key={route.name} kind={route.kind} name={route.name} back={back} openModel={openModel} />}
+          {route.view === 'model' && <CatalogDetail key={route.id} kind={route.kind} id={route.id} back={back} />}
+          {route.view === 'motorcycles' && <Motorcycles openCatalogBrand={openCatalogBrand} />}
+          {route.view === 'help' && <Help />}
           {route.view === 'cars' && <Cars {...shared} />}
           {route.view === 'car' && <CarDetail car={modelById[route.id]} back={back} fav={favs.includes(route.id)} toggleFav={toggleFav} />}
           {route.view === 'compare' && <Compare />}

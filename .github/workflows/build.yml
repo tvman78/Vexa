@@ -1,14 +1,24 @@
-# Builds Vexa for Android, iOS and macOS on GitHub's machines.
-# Run it from the Actions tab; the finished files appear as run artifacts.
+# Builds Vexa for Android, iOS and macOS on GitHub's machines and attaches them to the release.
 name: Build Vexa
 on:
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.1.0)'
+        required: true
+permissions:
+  contents: write
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
 
 jobs:
   android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { ref: '${{ env.TAG }}' }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - uses: actions/setup-java@v4
@@ -21,16 +31,40 @@ jobs:
           mkdir -p assets && cp build/icon.png assets/icon.png
           npx --yes @capacitor/assets@3.0.5 generate --android --iconBackgroundColor '#0a0b10' --splashBackgroundColor '#0a0b10' || echo "icon generation skipped"
           npx cap sync android
-      - name: Build debug APK
+      - name: Build APK
         working-directory: android
-        run: chmod +x gradlew && ./gradlew --no-daemon assembleDebug
-      - uses: actions/upload-artifact@v4
-        with: { name: Vexa-Android, path: android/app/build/outputs/apk/debug/*.apk }
+        run: |
+          V=$(node -p "require('../package.json').version"); CODE=$(echo "$V" | awk -F. '{print $1*10000+$2*100+$3}')
+          sed -i "s/versionCode [0-9]*/versionCode $CODE/; s/versionName \"[^\"]*\"/versionName \"$V\"/" app/build.gradle
+          chmod +x gradlew && ./gradlew --no-daemon assembleRelease
+      - name: Sign APK
+        working-directory: android
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          BT=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+          $BT/zipalign -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+          if [ -n "$KS_B64" ]; then
+            printf %s "$KS_B64" | tr -cd 'A-Za-z0-9+/=' | base64 -d > vexa.p12
+            export KS_PASS="$(printf %s "$KS_PASS" | sed 's/^\xEF\xBB\xBF//' | tr -d '\r\n')"
+            $BT/apksigner sign --ks vexa.p12 --ks-type PKCS12 --ks-pass env:KS_PASS --ks-key-alias vexa --out "../Vexa-Android-${TAG#v}.apk" aligned.apk
+            rm vexa.p12
+          else
+            echo "::warning::ANDROID_KEYSTORE secrets missing, using a temporary key (updates will need a reinstall)"
+            keytool -genkeypair -keystore tmp.jks -storepass android -keypass android -alias tmp -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Vexa"
+            $BT/apksigner sign --ks tmp.jks --ks-pass pass:android --out "../Vexa-Android-${TAG#v}.apk" aligned.apk
+          fi
+          $BT/apksigner verify "../Vexa-Android-${TAG#v}.apk"
+      - name: Upload to release
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh release upload "$TAG" "Vexa-Android-${TAG#v}.apk" --clobber -R "$GITHUB_REPOSITORY"
 
   ios:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+        with: { ref: '${{ env.TAG }}' }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
@@ -38,6 +72,7 @@ jobs:
       - name: Create iOS project
         run: |
           npx cap add ios
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $(node -p "require('./package.json').version")" ios/App/App/Info.plist || true
           mkdir -p assets && cp build/icon.png assets/icon.png
           npx --yes @capacitor/assets@3.0.5 generate --ios --iconBackgroundColor '#0a0b10' --splashBackgroundColor '#0a0b10' || echo "icon generation skipped"
           npx cap sync ios
@@ -47,19 +82,22 @@ jobs:
           xcodebuild -project App.xcodeproj -scheme App -configuration Release -sdk iphoneos -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
           mkdir -p Payload && cp -R build/Build/Products/Release-iphoneos/App.app Payload/
-          zip -qr ../../Vexa-iOS-unsigned.ipa Payload
-      - uses: actions/upload-artifact@v4
-        with: { name: Vexa-iOS-unsigned, path: Vexa-iOS-unsigned.ipa }
+          zip -qr "../../Vexa-iOS-unsigned-${TAG#v}.ipa" Payload
+      - name: Upload to release
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh release upload "$TAG" "Vexa-iOS-unsigned-${TAG#v}.ipa" --clobber -R "$GITHUB_REPOSITORY"
 
   macos:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+        with: { ref: '${{ env.TAG }}' }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - name: Build unsigned DMG
         env: { CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
         run: npm run dist:mac
-      - uses: actions/upload-artifact@v4
-        with: { name: Vexa-macOS, path: release/*.dmg }
+      - name: Upload to release
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh release upload "$TAG" release/Vexa-macOS-*.dmg --clobber -R "$GITHUB_REPOSITORY"

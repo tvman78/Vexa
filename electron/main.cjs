@@ -1,5 +1,8 @@
 const { app, BrowserWindow, shell } = require('electron');
 const path = require('path');
+const { registerUpdater } = require('./updater.cjs');
+
+let mainWindow = null;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -11,8 +14,9 @@ function createWindow() {
     title: 'Vexa',
     icon: path.join(__dirname, '..', 'build', 'icon.png'),
     autoHideMenuBar: true,
-    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(__dirname, 'preload.cjs') },
   });
+  mainWindow = win;
   win.removeMenu();
   win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -28,6 +32,7 @@ else {
     if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
   });
   app.whenReady().then(() => {
+    registerUpdater(() => mainWindow);
     createWindow();
     app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
   });
