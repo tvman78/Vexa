@@ -30,6 +30,12 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 ## What's new
 
+### 1.1.1
+
+- The Engine, Interior and Exterior tabs now show the matching photo for cars and motorcycles
+- Motorcycles get Engine, Cockpit and Exterior tabs
+- Photos are matched by brand, model and generation; if no verified photo exists, the app says so instead of showing a different vehicle
+
 ### 1.1.0
 
 - Replaced the 3D viewer with real car photos
@@ -47,6 +53,7 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 - Catalog data comes from [Wikidata](https://www.wikidata.org/) (CC0) and Wikipedia. It is broad but not a complete list of every vehicle ever built.
 - About half of the catalog models have a known production year. Models without one are listed last.
+- Engine, interior and cockpit photos are searched on Wikimedia Commons when a tab is opened, so they need internet and are not available for every model.
 - Full specifications exist for the 120 detailed cars. Other catalog models show a general fault and parts guide.
 - Figures are approximate. Check the manufacturer's documents before buying parts, and use a qualified mechanic for brakes, steering, fuel and safety systems.
 - Photos belong to their authors and keep their original licenses. Brand names are trademarks of their owners; Vexa is not affiliated with any manufacturer.

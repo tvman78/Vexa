@@ -6,6 +6,7 @@ import PHOTOS from './data/photos.json';
 import { partsFor, problemsFor } from './data/care.js';
 import { motoParts, motoProblems } from './data/extra.js';
 import { countryName } from './i18n.js';
+import { ViewGallery } from './ViewGallery.jsx';
 
 const PAGE = 48;
 const TIERS = ['economy', 'mid', 'premium', 'exotic', 'other'];
@@ -193,17 +194,24 @@ export function CatalogDetail({ kind, id, back }) {
   const problems = kind === 'moto' ? motoProblems(lang) : problemsFor(pseudo, lang);
   const parts = kind === 'moto' ? motoParts(lang) : partsFor(pseudo, lang);
   const facts = [[t.brands, brand[0]], [t.production, yearLabel(row, t)], ...(brand[1] ? [[t.country, countryName(brand[1], lang)]] : []), ...(kind === 'moto' ? [[t.category, t[`tier_${tierOf(brand[0])}`]]] : [])];
+  const insideTab = kind === 'moto' ? 'cockpit' : 'interior';
+  const tabs = ['overview', 'engine', insideTab, 'exterior', 'problems', 'parts'];
+  const photoView = ['engine', 'interior', 'cockpit', 'exterior'].includes(tab) ? tab : null;
+  const vehicle = { brand: brand[0], name: row[1], start: row[3], end: row[4] };
+  const coverPhoto = row[5] ? [{ src: commonsThumb(row[5], 960), author: 'Wikimedia Commons', license: 'Wikimedia Commons', url: `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(row[5])}` }] : [];
+  const tabGroups = { engine: ['engine', 'fuel', 'cooling', 'exhaust'], interior: ['interior'], cockpit: ['interior', 'electrical'], exterior: ['body', 'suspension'] };
   return (
     <div className="page detail">
       <header className="detail-head">
         <button className="ghost" onClick={back}><span className="flip">←</span> {t.back}</button>
         <div className="detail-title"><Monogram name={brand[0]} /><div><small>{brand[0]}</small><h1><bdi>{row[1]}</bdi></h1></div></div>
       </header>
-      <section className="gallery">
+      {photoView ? <ViewGallery vehicle={vehicle} view={photoView} label={t[`tab_${tab}`]} local={photoView === 'exterior' ? coverPhoto : []} /> : <section className="gallery">
         <div className="gallery-main">{row[5] && !failed ? <img src={commonsThumb(row[5], 960)} alt={`${brand[0]} ${row[1]}`} onError={() => setFailed(true)} /> : <span className="no-photo">{t.noPhoto}</span>}</div>
         {row[5] && <a className="credit" href={`https://commons.wikimedia.org/wiki/File:${encodeURIComponent(row[5])}`} target="_blank" rel="noreferrer">{t.photoBy}: Wikimedia Commons</a>}
-      </section>
-      <div className="tabs">{['overview', 'problems', 'parts'].map((k) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{t[`tab_${k}`]}</button>)}</div>
+      </section>}
+      <div className="tabs">{tabs.map((k) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{t[`tab_${k}`]}</button>)}</div>
+      {photoView && <div className="part-groups view-parts">{parts.filter(({ group }) => tabGroups[photoView].includes(group)).map(({ group, parts: items }) => <section className="part-group" key={group}><h3>{t[`group_${group}`]}</h3><ul>{items.map((x) => <li key={x.id}>{x.name}</li>)}</ul></section>)}</div>}
       {tab === 'overview' && <>
         <dl className="spec-grid">{facts.map(([k, v]) => <div key={k}><dt>{k}</dt><dd><bdi>{v}</bdi></dd></div>)}</dl>
         <a className="ghost source" href={`https://www.wikidata.org/wiki/${row[0]}`} target="_blank" rel="noreferrer">{t.openWiki}</a>

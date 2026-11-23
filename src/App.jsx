@@ -3,6 +3,7 @@ import { I18n, useI18n } from './context.js';
 import { Brands, CatalogBrand, CatalogDetail, ModelList, Monogram, Motorcycles, useCatalog } from './Catalog.jsx';
 import { Help, UpdatePanel } from './Help.jsx';
 import { NavIcon } from './icons.jsx';
+import { ViewGallery } from './ViewGallery.jsx';
 import { APP_VERSION } from './update.js';
 import { BRANDS, brandById } from './data/brands.js';
 import { MODELS, modelById, modelsOfBrand } from './data/models.js';
@@ -129,6 +130,11 @@ function CarDetail({ car, back, fav, toggleFav }) {
   const s = useMemo(() => specs(car, t, n), [car, t, n]);
   const overview = [[t.production, years(car, t)], [t.country, countryName(brand.country, lang)], [t.category, t[`cat_${car.cat}`]], [t.bodyType, t[`body_${car.body}`]], s.engine[0], s.engine[5], s.engine[6], s.perf[0], s.perf[1], s.perf[4], s.perf[5], s.engine[4]];
   const tabs = { overview, engine: s.engine, perf: s.perf, dims: s.dims, interior: s.interior, exterior: s.exterior, problems: null, parts: null };
+  const photoView = ['engine', 'interior', 'exterior'].includes(tab) ? tab : null;
+  const [startYear, endYear] = car.years.split('-').map((y) => Number(y) || 0);
+  const vehicle = { brand: brand.name, name: car.name, start: startYear, end: endYear };
+  const localKinds = photoView === 'exterior' ? ['front', 'rear'] : [photoView];
+  const localPhotos = photosOf(car).filter((p) => localKinds.includes(p.kind)).map((p) => ({ ...p, src: photoSrc(p) }));
   return (
     <div className="page detail">
       <header className="detail-head">
@@ -136,7 +142,7 @@ function CarDetail({ car, back, fav, toggleFav }) {
         <div className="detail-title"><Monogram name={brand.name} /><div><small>{brand.name}</small><h1><bdi>{car.name}</bdi></h1></div></div>
         <button className={`ghost fav ${fav ? 'on' : ''}`} onClick={() => toggleFav(car.id)}>♥ {fav ? t.removeFav : t.addFav}</button>
       </header>
-      <Gallery car={car} />
+      {photoView ? <ViewGallery vehicle={vehicle} view={photoView} label={t[`tab_${tab}`]} local={localPhotos} /> : <Gallery car={car} />}
       <div className="tabs">{Object.keys(tabs).map((k) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{t[`tab_${k}`]}</button>)}</div>
       {tab === 'problems' ? <Problems car={car} /> : tab === 'parts' ? <Parts car={car} /> : <><SpecGrid rows={tabs[tab]} /><p className="note">{t.dataNote}</p></>}
     </div>

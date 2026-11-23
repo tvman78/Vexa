@@ -1,5 +1,6 @@
 import { CARE_UI } from './data/care.js';
 import { EXTRA_UI } from './data/extra.js';
+import { PHOTO_UI } from './photoSearch.js';
 
 const KEYS = `home brands cars compare favorites settings tagline heroText explore statBrands statModels statCountries featured search all allCountries noResults noModelsBrand founded active defunct models back
 cat_sport cat_classic cat_economy cat_luxury cat_suv body_sedan body_hatch body_coupe body_wagon body_suv body_convertible body_pickup body_supercar fuel_p fuel_d
@@ -73,7 +74,7 @@ export const LANGUAGES = [
 export const DICTS = Object.fromEntries(Object.entries(PACKS).map(([lang, text]) => {
   const values = text.split(/[|\n]/);
   if (values.length !== KEYS.length) throw new Error(`i18n ${lang}: ${values.length}/${KEYS.length}`);
-  return [lang, { ...Object.fromEntries(KEYS.map((key, i) => [key, values[i]])), ...CARE_UI[lang], ...EXTRA_UI[lang] }];
+  return [lang, { ...Object.fromEntries(KEYS.map((key, i) => [key, values[i]])), ...CARE_UI[lang], ...EXTRA_UI[lang], ...PHOTO_UI[lang] }];
 }));
 
 export function detectLanguage() {

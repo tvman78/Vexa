@@ -61,7 +61,7 @@ jobs:
         run: gh release upload "$TAG" "Vexa-Android-${TAG#v}.apk" --clobber -R "$GITHUB_REPOSITORY"
 
   ios:
-    runs-on: macos-15
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
         with: { ref: '${{ env.TAG }}' }
@@ -88,7 +88,7 @@ jobs:
         run: gh release upload "$TAG" "Vexa-iOS-unsigned-${TAG#v}.ipa" --clobber -R "$GITHUB_REPOSITORY"
 
   macos:
-    runs-on: macos-15
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
         with: { ref: '${{ env.TAG }}' }
