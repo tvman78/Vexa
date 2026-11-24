@@ -14,6 +14,15 @@ const catalog = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'catal
 const UA = 'VexaLogoBuilder/1.0 (open-source vehicle reference app)';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const fileName = (uri) => decodeURIComponent(uri.split('/').pop());
+// upload.wikimedia.org rate-limits original files hard; thumbnails from thumb.wikimedia.org are served normally.
+const thumbUrl = (info) => {
+  const clean = (u) => u.replace(/\?utm_source=.*$/, '');
+  const t = clean(info.thumburl || '');
+  if (t.includes('/thumb/')) return t.replace('//upload.wikimedia.org/', '//thumb.wikimedia.org/');
+  const m = clean(info.url).match(/^https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/(\w\/\w\w)\/(.+)$/);
+  if (!m) return t || clean(info.url);
+  return `https://thumb.wikimedia.org/wikipedia/commons/thumb/${m[1]}/${m[2]}/250px-${m[2]}${/\.svg$/i.test(m[2]) ? '.png' : ''}`;
+};
 const slug = (s) => foldBrand(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'brand';
 
 async function sparql(query) {
@@ -49,7 +58,8 @@ const names = new Map();
 for (const name of [...BRANDS.map((b) => b.name), ...catalog.car.brands.map((b) => b[0]), ...catalog.moto.brands.map((b) => b[0])]) names.set(foldBrand(name), name);
 
 // Checked by hand: these Wikidata "logos" are car photos, blank images or electric-only branding.
-const REJECT = new Set(['changan', 'sbarro', 'vehiculos automotores mexicanos', 'briggs automotive', 'k-1 vehicles', 'soueast', 'mahindra & mahindra']);
+const REJECT = new Set(['changan', 'sbarro', 'vehiculos automotores mexicanos', 'briggs automotive', 'k-1 vehicles', 'soueast', 'mahindra & mahindra',
+  'advanced design tramontana', 'david brown automotive', 'changan ford', 'ford-vairogs', 'beijing', 'thomas', 'daniels', 'douglas', 'pathfinder']);
 const found = new Map();
 const offer = (brandName, logo, exact) => {
   const key = foldBrand(canonicalBrand(brandName));
@@ -93,8 +103,8 @@ for (let i = 0; i < todo.length; i += 40) {
     const info = byTitle.get(`File:${value.logo}`)?.imageinfo?.[0];
     if (!info) { failed.push(names.get(key)); continue; }
     try {
-      if (process.env.LOGO_DEBUG) console.log(`  ${names.get(key)}: ${info.thumburl || info.url}`);
-      const raw = await get(info.thumburl || info.url, true);
+      if (process.env.LOGO_DEBUG) console.log(`  ${names.get(key)}: ${thumbUrl(info)}`);
+      const raw = await get(thumbUrl(info), true);
       const file = `${slug(names.get(key))}.webp`;
       await sharp(raw, { animated: false }).resize({ width: 160, height: 160, fit: 'inside', withoutEnlargement: false }).webp({ quality: 84, alphaQuality: 90 }).toFile(path.join(outDir, file));
       manifest[key] = { file, title: value.logo, url: info.descriptionurl, license: info.extmetadata?.LicenseShortName?.value || '' };
