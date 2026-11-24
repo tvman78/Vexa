@@ -31,6 +31,11 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 ## What's new
 
+### 1.2.1
+
+- Production years for 1,247 more models, taken from German, Italian, Polish, French, Russian, Czech, Japanese and other Wikipedia articles: 67% of cars and 63% of motorcycles now show their years
+- Only explicit production ranges are used; design, racing and prototype dates are skipped
+
 ### 1.2.0
 
 - 30 more cars with full specifications, many of them common in Turkey: Renault Megane Sedan, Taliant and 9 Broadway; Fiat Linea, Doblo, Tempra, Uno, Palio and Albea; Hyundai Accent Blue and i10; Opel Corsa and Vectra B; VW Polo, Jetta and Golf Mk4; Toyota Yaris; Ford Fiesta and Transit Courier; Dacia Logan; Honda Civic Sedan; Peugeot 301; Citroën C-Elysée; Škoda Fabia; SEAT Ibiza; Kia Rio; BMW 520d; Mercedes E 220 d; Audi A4; Tofaş Murat 131
@@ -87,7 +92,7 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 ## Data and limitations
 
 - Catalog data comes from [Wikidata](https://www.wikidata.org/) (CC0) and Wikipedia. It is broad but not a complete list of every vehicle ever built.
-- About half of the catalog models have a known production year. Models without one are listed last.
+- About two thirds of the catalog models have a known production year. Models without one are listed last.
 - Engine, interior and cockpit photos are searched on Wikimedia Commons when a tab is opened, so they need internet and are not available for every model.
 - Full specifications exist for the 150 detailed cars. Other catalog models show a general fault and parts guide.
 - Figures are approximate. Check the manufacturer's documents before buying parts, and use a qualified mechanic for brakes, steering, fuel and safety systems.

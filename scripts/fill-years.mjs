@@ -44,11 +44,32 @@ const RANGES = [
   new RegExp(`с\\s+${Y}\\s+(?:по|до)\\s+${Y}`),                      // с 1990 по 1995
 ];
 const valid = (s, e) => s >= 1885 && e >= s && e <= NOW && e - s <= 60;
+// Years next to these words are design, racing or concept dates, not production.
+const NOT_PRODUCTION = /renn|entwickel|konstruiert|développ|conçu|svilupp|progettat|разработ|спроектир|desarroll|diseñ|ontwikkel|ontworpen|opracow|zaprojekt|vyvinut|navržen|開発|設計|geliştiril|tasarlan|utveckl|desenvolv|rennen|course|corsa|гонк|carrera|race|wyścig|závod|レース|yarış|concept|prototyp|прототип|試作/i;
+const fold = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+// The article must name this exact model: a link can redirect to a general page (Focus ST -> Ford Focus).
+function namesModel(text, name, brand) {
+  const t = fold(text).replace(/[\s-]+/g, ' ');
+  const brandWords = new Set(fold(brand).split(/[\s-]+/));
+  const tokens = fold(name).replace(/[()]/g, ' ').split(/[\s-]+/).filter((w) => w && !brandWords.has(w));
+  const digits = tokens.map((w) => w.replace(/\D/g, '')).filter(Boolean);
+  if (digits.length) return digits.every((d) => new RegExp(`(^|\\D)${d}(\\D|$)`).test(t));
+  const last = tokens[tokens.length - 1];
+  return !!last && last.length >= 2 && /[a-z]/.test(last) && t.includes(last);
+}
 function rangeFrom(text) {
-  const head = text.split(/(?<=[.。])\s/).slice(0, 3).join(' ');
+  const head = text.split(/(?<=[.。])\s/).slice(0, 2).join(' ');
+  const all = RANGES.flatMap((re) => [...head.matchAll(new RegExp(re.source, 'g'))]);
+  if (all.length > 2) return null; // several ranges (variants, revivals): too ambiguous
   for (const re of RANGES) {
     const m = head.match(re);
-    if (m && valid(Number(m[1]), Number(m[2]))) return [Number(m[1]), Number(m[2])];
+    if (!m || !valid(Number(m[1]), Number(m[2]))) continue;
+    const around = head.slice(Math.max(0, m.index - 80), m.index + m[0].length + 30);
+    if (NOT_PRODUCTION.test(around)) return null;
+    // An earlier year before the range ("since 1996 ... 2013–2018") means the range is one generation of many.
+    const earlier = (head.slice(0, m.index).match(/(18[89]\d|19\d\d|20[0-2]\d)/g) || []).map(Number);
+    if (earlier.some((y) => y < Number(m[1]))) return null;
+    return [Number(m[1]), Number(m[2])];
   }
   return null;
 }
@@ -106,12 +127,15 @@ for (const lang of LANGS) {
   fs.writeFileSync(cachePath, JSON.stringify(cache));
 }
 
+const info = new Map();
+for (const kind of ['car', 'moto']) for (const r of catalog[kind].rows) info.set(r[0], [r[1], catalog[kind].brands[r[2]][0]]);
 for (const [q, list] of links) {
   // Prefer the language whose article gives a range; when two languages disagree, keep neither.
-  const ranges = list.map(([lang, t]) => [lang, rangeFrom(cache[`${lang}:${t}`] || '')]).filter(([, r]) => r);
+  const [name, brand] = info.get(q);
+  const ranges = list.map(([lang, t]) => { const text = cache[`${lang}:${t}`] || ''; return [lang, namesModel(text, name, brand) ? rangeFrom(text) : null, t]; }).filter(([, r]) => r);
   if (!ranges.length) continue;
   const agree = ranges.every(([, r]) => r[0] === ranges[0][1][0]);
-  if (agree) found[q] = [...ranges[0][1], ranges[0][0]];
+  if (agree) found[q] = [...ranges[0][1], ranges[0][0], ranges[0][2]];
 }
 
 fs.writeFileSync(outPath, JSON.stringify(Object.fromEntries(Object.entries(found).sort()), null, 0));
