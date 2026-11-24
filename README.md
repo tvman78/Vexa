@@ -20,6 +20,7 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 - **9,204 car models from 858 brands** and **2,020 motorcycle models from 139 brands**, from the earliest years to today
 - **No electric vehicles:** electric, plug-in and hybrid models are filtered out
 - Real photos from Wikimedia Commons, with author and license credits
+- Real brand logos for 422 car and motorcycle brands
 - 120 detailed cars with engine, performance, dimensions, interior and exterior data
 - Common mechanical faults with symptoms and solutions
 - Full part lists: engine, fuel, cooling, exhaust, transmission, brakes, suspension, electrical, body and interior
@@ -29,6 +30,12 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 - 11 languages: English, Türkçe, Deutsch, Français, Español, Italiano, Português, Русский, العربية, 中文, 日本語
 
 ## What's new
+
+### 1.1.2
+
+- Real brand logos on the Brands and Motorcycles pages: 422 car and motorcycle brands, including BMW, Mercedes-Benz, Ford, Toyota, Ferrari, Tofaş, Honda, Yamaha and KTM
+- Brands without a verified logo keep the colored letter badge; more logos will follow in later updates
+- Logos are stored inside the app, so they also work offline
 
 ### 1.1.1
 
@@ -56,7 +63,7 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 - Engine, interior and cockpit photos are searched on Wikimedia Commons when a tab is opened, so they need internet and are not available for every model.
 - Full specifications exist for the 120 detailed cars. Other catalog models show a general fault and parts guide.
 - Figures are approximate. Check the manufacturer's documents before buying parts, and use a qualified mechanic for brakes, steering, fuel and safety systems.
-- Photos belong to their authors and keep their original licenses. Brand names are trademarks of their owners; Vexa is not affiliated with any manufacturer.
+- Photos belong to their authors and keep their original licenses. Brand names and logos are trademarks of their owners and are shown only to identify each brand; Vexa is not affiliated with any manufacturer. Logo sources are listed in `src/data/logos.json`.
 
 ## Developer notes
 

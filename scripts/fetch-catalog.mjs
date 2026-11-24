@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { canonicalBrand } from './brand-names.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outPath = path.join(root, 'src', 'data', 'catalog.json');
@@ -55,17 +56,6 @@ function yearsFromIntro(text) {
 }
 
 const NOT_A_PRODUCT = /\b(concept|prototype|show car|race car|racing car|formula|f1 car|gt3|lmp\d?|dtm|wrc|rally car|toy|scale model)\b/i;
-
-const ALIASES = { 'birmingham small arms company': 'BSA', 'kwang yang motor': 'KYMCO', 'kawasaki heavy industries': 'Kawasaki', 'bayerische motoren werke': 'BMW', 'bmw motorrad': 'BMW', 'mercedes-benz group': 'Mercedes-Benz', 'daimler-benz': 'Mercedes-Benz', 'fiat automobiles': 'Fiat', 'ferrari n.v.': 'Ferrari' };
-const COMPANY_SUFFIX = /\s+(motor cars|motor company|motor corporation|motor co\.?|motorcycle company|motorcycles|motorcycle|motors?|automobiles?|automobili|cars|ag|s\.?p\.?a\.?|gmbh|ltd\.?|limited|inc\.?|corporation|company|group|n\.v\.)$/i;
-function canonicalBrand(name) {
-  const alias = ALIASES[name.toLowerCase()];
-  if (alias) return alias;
-  if (/^(general|american|british|united) motors?/i.test(name)) return name;
-  let out = name.replace(/,/g, '').trim();
-  for (let next = out.replace(COMPANY_SUFFIX, ''); next !== out && next.length >= 2; next = out.replace(COMPANY_SUFFIX, '')) out = next;
-  return ALIASES[out.toLowerCase()] || out;
-}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const qid = (uri) => uri.split('/').pop();

@@ -3,6 +3,7 @@ import { useI18n } from './context.js';
 import { BRANDS } from './data/brands.js';
 import { modelsOfBrand } from './data/models.js';
 import PHOTOS from './data/photos.json';
+import LOGOS from './data/logos.json';
 import { partsFor, problemsFor } from './data/care.js';
 import { motoParts, motoProblems } from './data/extra.js';
 import { countryName } from './i18n.js';
@@ -35,6 +36,11 @@ const tierOf = (name) => TIERS.find((tier) => TIER_BRANDS[tier]?.includes(fold(n
 const yearLabel = (row, t) => (row[3] ? `${row[3]}${row[4] ? ` – ${row[4]}` : ''}` : t.unknownYear);
 
 export function Monogram({ name, large }) {
+  const logo = LOGOS[fold(name)];
+  const [logoFailed, setLogoFailed] = useState(false);
+  if (logo && !logoFailed) {
+    return <span className={`logo-tile ${large ? 'large' : ''}`}><img src={`./logos/${logo.file}`} alt={`${name} logo`} loading="lazy" onError={() => setLogoFailed(true)} /></span>;
+  }
   const hue = [...name].reduce((sum, c) => sum + c.charCodeAt(0) * 7, 0) % 360;
   const letters = name.replace(/[^\p{L}\p{N} ]/gu, '').split(' ').filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
   return <span className={`mono ${large ? 'large' : ''}`} style={{ '--h': hue }}>{letters}</span>;
