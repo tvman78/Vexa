@@ -31,6 +31,10 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 ## What's new
 
+### 1.1.5
+
+- Anadol now lists A1, STC-16, SV-1600, Böcek and A8-16 with photos; before, these were hidden under Ford Otosan
+
 ### 1.1.4
 
 - Added the Anadol logo (the original deer badge), for 607 brand logos in total
@@ -77,5 +81,6 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 ## Developer notes
 
 - `Guncelleme-Yayinla.bat` — bumps the version and publishes to GitHub; Android, iOS and macOS builds are then made by GitHub Actions (`.github/workflows/build.yml`)
-- `scripts/fetch-catalog.mjs` — rebuilds the car and motorcycle catalog
+- `scripts/fetch-catalog.mjs` — rebuilds the car and motorcycle catalog; run `scripts/patch-catalog.mjs` after it to re-apply hand-checked fixes (for example Anadol models)
+- `scripts/fetch-logos.mjs` — downloads brand logos; its `REJECT` list holds logos removed after a visual check
 - `scripts/fetch-photos.mjs`, `fix-photos.mjs`, `prune-photos.mjs` — download and clean the bundled photos
