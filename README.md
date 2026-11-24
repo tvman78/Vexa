@@ -31,6 +31,11 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 ## What's new
 
+### 1.1.7
+
+- Added the Anadol A2, Turkey's first four-door car
+- Production years for Anadol and Tofaş models, checked against Turkish Wikipedia
+
 ### 1.1.6
 
 - Added Tofaş Serçe and the Anadol P2 pickup with photos
