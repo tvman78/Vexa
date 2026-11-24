@@ -20,7 +20,7 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 - **9,204 car models from 858 brands** and **2,020 motorcycle models from 139 brands**, from the earliest years to today
 - **No electric vehicles:** electric, plug-in and hybrid models are filtered out
 - Real photos from Wikimedia Commons, with author and license credits
-- Real brand logos for 606 car and motorcycle brands
+- Real brand logos for 607 car and motorcycle brands
 - 120 detailed cars with engine, performance, dimensions, interior and exterior data
 - Common mechanical faults with symptoms and solutions
 - Full part lists: engine, fuel, cooling, exhaust, transmission, brakes, suspension, electrical, body and interior
@@ -30,6 +30,10 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 - 11 languages: English, Türkçe, Deutsch, Français, Español, Italiano, Português, Русский, العربية, 中文, 日本語
 
 ## What's new
+
+### 1.1.4
+
+- Added the Anadol logo (the original deer badge), for 607 brand logos in total
 
 ### 1.1.3
 
