@@ -12,7 +12,7 @@ import { ViewGallery } from './ViewGallery.jsx';
 const PAGE = 48;
 const TIERS = ['economy', 'mid', 'premium', 'exotic', 'other'];
 const TIER_BRANDS = {
-  economy: ['bajaj', 'hero', 'hero honda', 'tvs', 'kymco', 'sym', 'lifan', 'zongshen', 'loncin', 'mondial', 'kuba', 'rks', 'minsk', 'planeta', 'izh', 'simson', 'mz', 'daelim', 'hyosung', 'royal enfield', 'jawa', 'cz', 'piaggio', 'vespa', 'peugeot', 'dnepr', 'voskhod'],
+  economy: ['bajaj', 'hero', 'hero honda', 'tvs', 'kymco', 'sym', 'lifan', 'zongshen', 'loncin', 'mondial', 'kuba', 'rks', 'asya','minsk', 'planeta', 'izh', 'simson', 'mz', 'daelim', 'hyosung', 'royal enfield', 'jawa', 'cz', 'piaggio', 'vespa', 'peugeot', 'dnepr', 'voskhod'],
   mid: ['honda', 'yamaha', 'suzuki', 'kawasaki', 'cfmoto', 'benelli', 'gilera', 'cagiva', 'ural', 'beta', 'sherco', 'gasgas', 'derbi', 'laverda', 'bsa', 'matchless', 'ajs'],
   premium: ['bmw', 'ducati', 'triumph', 'harley-davidson', 'indian', 'moto guzzi', 'ktm', 'aprilia', 'norton', 'husqvarna', 'buell', 'victory'],
   exotic: ['mv agusta', 'bimota', 'vyrus', 'confederate', 'brough superior', 'vincent', 'ecosse', 'morbidelli', 'egli', 'munch', 'tamburini'],

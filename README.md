@@ -17,11 +17,11 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 ## Features
 
-- **9,204 car models from 858 brands** and **2,020 motorcycle models from 139 brands**, from the earliest years to today
+- **9,210 car models from 858 brands** and **2,089 motorcycle models from 142 brands**, from the earliest years to today
 - **No electric vehicles:** electric, plug-in and hybrid models are filtered out
 - Real photos from Wikimedia Commons, with author and license credits
 - Real brand logos for 607 car and motorcycle brands
-- 120 detailed cars with engine, performance, dimensions, interior and exterior data
+- 150 detailed cars with engine, performance, dimensions, interior and exterior data
 - Common mechanical faults with symptoms and solutions
 - Full part lists: engine, fuel, cooling, exhaust, transmission, brakes, suspension, electrical, body and interior
 - Motorcycle brands arranged from economy to mid-range, premium and exotic
@@ -30,6 +30,12 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 - 11 languages: English, Türkçe, Deutsch, Français, Español, Italiano, Português, Русский, العربية, 中文, 日本語
 
 ## What's new
+
+### 1.2.0
+
+- 30 more cars with full specifications, many of them common in Turkey: Renault Megane Sedan, Taliant and 9 Broadway; Fiat Linea, Doblo, Tempra, Uno, Palio and Albea; Hyundai Accent Blue and i10; Opel Corsa and Vectra B; VW Polo, Jetta and Golf Mk4; Toyota Yaris; Ford Fiesta and Transit Courier; Dacia Logan; Honda Civic Sedan; Peugeot 301; Citroën C-Elysée; Škoda Fabia; SEAT Ibiza; Kia Rio; BMW 520d; Mercedes E 220 d; Audi A4; Tofaş Murat 131
+- Turkish motorcycle makers Kuba, RKS and Asya with their model ranges
+- Devrim (1961), Turkey's first car, now shows its year
 
 ### 1.1.7
 
@@ -83,7 +89,7 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 - Catalog data comes from [Wikidata](https://www.wikidata.org/) (CC0) and Wikipedia. It is broad but not a complete list of every vehicle ever built.
 - About half of the catalog models have a known production year. Models without one are listed last.
 - Engine, interior and cockpit photos are searched on Wikimedia Commons when a tab is opened, so they need internet and are not available for every model.
-- Full specifications exist for the 120 detailed cars. Other catalog models show a general fault and parts guide.
+- Full specifications exist for the 150 detailed cars. Other catalog models show a general fault and parts guide.
 - Figures are approximate. Check the manufacturer's documents before buying parts, and use a qualified mechanic for brakes, steering, fuel and safety systems.
 - Photos belong to their authors and keep their original licenses. Brand names and logos are trademarks of their owners and are shown only to identify each brand; Vexa is not affiliated with any manufacturer. Logo sources are listed in `src/data/logos.json`.
 
@@ -91,5 +97,7 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 - `Guncelleme-Yayinla.bat` — bumps the version and publishes to GitHub; Android, iOS and macOS builds are then made by GitHub Actions (`.github/workflows/build.yml`)
 - `scripts/fetch-catalog.mjs` — rebuilds the car and motorcycle catalog; run `scripts/patch-catalog.mjs` after it to re-apply hand-checked fixes (for example Anadol models)
+- `scripts/fill-years.mjs` — finds missing production years in other-language Wikipedia articles (explicit year ranges only) and saves them to `scripts/years-extra.json`
+- `scripts/add-photos.mjs` — adds hand-picked Commons photos for models whose Wikipedia page mixes generations
 - `scripts/fetch-logos.mjs` — downloads brand logos; its `REJECT` list holds logos removed after a visual check
 - `scripts/fetch-photos.mjs`, `fix-photos.mjs`, `prune-photos.mjs` — download and clean the bundled photos
