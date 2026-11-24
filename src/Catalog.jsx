@@ -220,7 +220,7 @@ export function CatalogDetail({ kind, id, back }) {
       {photoView && <div className="part-groups view-parts">{parts.filter(({ group }) => tabGroups[photoView].includes(group)).map(({ group, parts: items }) => <section className="part-group" key={group}><h3>{t[`group_${group}`]}</h3><ul>{items.map((x) => <li key={x.id}>{x.name}</li>)}</ul></section>)}</div>}
       {tab === 'overview' && <>
         <dl className="spec-grid">{facts.map(([k, v]) => <div key={k}><dt>{k}</dt><dd><bdi>{v}</bdi></dd></div>)}</dl>
-        <a className="ghost source" href={`https://www.wikidata.org/wiki/${row[0]}`} target="_blank" rel="noreferrer">{t.openWiki}</a>
+        {/^Q\d+$/.test(row[0]) && <a className="ghost source" href={`https://www.wikidata.org/wiki/${row[0]}`} target="_blank" rel="noreferrer">{t.openWiki}</a>}
       </>}
       {tab === 'problems' && <div className="problem-list">
         <p className="note">{kind === 'moto' ? t.motoNote : t.genericNote}</p>

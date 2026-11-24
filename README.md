@@ -31,6 +31,10 @@ Latest release: **[Releases](https://github.com/tvman78/Vexa/releases/latest)**
 
 ## What's new
 
+### 1.1.6
+
+- Added Tofaş Serçe and the Anadol P2 pickup with photos
+
 ### 1.1.5
 
 - Anadol now lists A1, STC-16, SV-1600, Böcek and A8-16 with photos; before, these were hidden under Ford Otosan

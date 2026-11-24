@@ -9,12 +9,17 @@ const catalog = JSON.parse(fs.readFileSync(file, 'utf8'));
 const car = catalog.car;
 
 // [Wikidata id, model name, start year, end year, Commons file]. Years stay 0 when no reliable source gives them.
+// Models with no Wikidata item use a "vx-" id; the app hides the Wikidata link for them.
 const ADD = {
+  'Tofaş': { country: 'TR', rows: [
+    ['vx-tofas-serce', 'Serçe', 0, 0, 'Tofaş Serçe late fv.JPG'],
+  ] },
   Anadol: { country: 'TR', rows: [
     ['Q31187731', 'A1', 1966, 1971,'Rahmi Koç Museum DSC 1308 (17910902750).jpg'],
     ['Q6100603', 'STC-16', 1973, 1975, 'Anadol 4a.JPG'],
     ['Q31192527', 'Böcek', 0, 0, 'Otosan Böcek in the Rahmi M. Koç Museum.JPG'],
     ['Q31192528', 'SV-1600', 0, 0, 'Anadol SV 1600.jpg'],
+    ['vx-anadol-p2-pickup', 'P2 Pickup', 0, 0, 'Anadol P2 pickup in Izmir.jpg'],
   ] },
 };
 const MOVE = [{ from: 'Ford Otosan', to: 'Anadol', match: /^Anadol /, rename: (n) => n.replace(/^Anadol /, '') }];
